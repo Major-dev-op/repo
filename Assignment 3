@@ -1,0 +1,181 @@
+/**
+ * @author Halim Dogrusoz
+ * Date Created: 10/18/2020
+ * Class Name: CryptoManager
+ * Description: This program encrypts and decrypts both Caeser and
+ * 				Bellaso ciphers
+ */
+
+
+public class CryptoManager {
+	
+	// Define Constants
+	private static final char LOWER_BOUND = ' ';
+	private static final char UPPER_BOUND = '_';
+	private static final int RANGE = UPPER_BOUND - LOWER_BOUND + 1;
+
+	/**
+	 * This method determines if a string is within the allowable bounds of ASCII codes 
+	 * according to the LOWER_BOUND and UPPER_BOUND characters
+	 * @param plainText a string to be encrypted, if it is within the allowable bounds
+	 * @return true if all characters are within the allowable bounds, false if any character is outside
+	 * @author Halim Dogrusoz
+	 */
+	
+	
+	public static boolean stringInBounds (String plainText) {
+		
+		// Iterate through the plainText to see if each character is valid. If there is an invalid character return false. True otherwise 
+		for(int i = 0; i < plainText.length(); i++) {
+			
+			if (((int) plainText.charAt(i) < (int) LOWER_BOUND) || ((int) plainText.charAt(i) > (int) UPPER_BOUND))
+				
+				return false;
+		}
+		return true;
+		
+	}
+
+	/**
+	 * Encrypts a string according to the Caesar Cipher.  The integer key specifies an offset
+	 * and each character in plainText is replaced by the character \"offset\" away from it 
+	 * @param plainText an uppercase string to be encrypted.
+	 * @param key an integer that specifies the offset of each character
+	 * @return the encrypted string
+	 * @author Halim Dogrusoz
+	 */
+	
+	public static String encryptCaesar(String plainText, int key) {
+		
+		String encryptedMessage = "";
+		
+		// Iterate through the plainText to build up the encrypted version of plainText.
+		for(int i = 0; i < plainText.length(); i++) {
+			
+			// Call shiftUpByN to convert i'th character of plainText by the amount of key.
+			encryptedMessage += shiftUpByN(plainText.charAt(i), key);
+		}
+		return encryptedMessage;
+		
+	}
+	
+	/**
+	 * Encrypts a string according the Bellaso Cipher.  Each character in plainText is offset 
+	 * according to the ASCII value of the corresponding character in bellasoStr, which is repeated
+	 * to correspond to the length of plainText
+	 * @param plainText an uppercase string to be encrypted.
+	 * @param bellasoStr an uppercase string that specifies the offsets, character by character.
+	 * @return the encrypted string
+	 * @author Halim Dogrusoz
+	 */
+	public static String encryptBellaso(String plainText, String bellasoStr) {
+		String key;
+		String encryptedString = "";
+		
+		// By using createBellasoKey create a key using bellasoStr for plainText.
+		key = createBellasoKey(bellasoStr, plainText.length());
+		
+		// Iterate through the plainText and key to build up the encrypted version of plainText.
+		for(int i = 0; i < key.length(); i++) {
+			
+			// Call shiftUpByN to convert i'th character of plainText by the integer value of the corresponding character of the key.
+			encryptedString += shiftUpByN(plainText.charAt(i),  (int) key.charAt(i));
+		}
+		return encryptedString;
+		
+	}
+	
+	/**
+	 * Decrypts a string according to the Caesar Cipher.  The integer key specifies an offset
+	 * and each character in encryptedText is replaced by the character \"offset\" characters before it.
+	 * This is the inverse of the encryptCaesar method.
+	 * @param encryptedText an encrypted string to be decrypted.
+	 * @param key an integer that specifies the offset of each character
+	 * @return the plain text string
+	 * @author Halim Dogrusoz
+	 */
+	public static String decryptCaesar(String encryptedText, int key) {
+		String dencryptedMessage = "";
+		
+		// Iterate through the encryptedText to build up the decrypted version of encryptedText.
+		for(int i = 0; i < encryptedText.length(); i++) {
+			
+			// Call shiftUpByN to convert i'th character of encryptedText by RANGE minus key modulo RANGE(remainder of key/RANGE).
+			// Here I wanted to use shiftUpByN for the decryption process that is why I am passing RANGE minus key, instead of key.
+			dencryptedMessage += shiftUpByN(encryptedText.charAt(i), RANGE-(key%RANGE));
+		}
+		return dencryptedMessage;
+	}
+	
+	/**
+	 * Decrypts a string according the Bellaso Cipher.  Each character in encryptedText is replaced by
+	 * the character corresponding to the character in bellasoStr, which is repeated
+	 * to correspond to the length of plainText.  This is the inverse of the encryptBellaso method.
+	 * @param encryptedText an uppercase string to be encrypted.
+	 * @param bellasoStr an uppercase string that specifies the offsets, character by character.
+	 * @return the decrypted string
+	 * @author Halim Dogrusoz
+	 */
+	public static String decryptBellaso(String encryptedText, String bellasoStr) {
+		String key;
+		String decryptedString = "";
+		
+		// By using createBellasoKey create a key using bellasoStr for encryptedText.
+		key = createBellasoKey(bellasoStr, encryptedText.length());
+		
+		// Iterate through the encyptedText and key to build up the decrypted version of encyptedText.
+		for(int i = 0; i < key.length(); i++) {
+			
+			// Call shiftUpByN to convert i'th character of encryptedText by RANGE minus (integer value of key(i)) modulo RANGE(remainder of key/RANGE).
+			// Here I wanted to use shiftUpByN for the decryption process that is why I am passing RANGE minus key, instead of key.
+			decryptedString += shiftUpByN(encryptedText.charAt(i), RANGE - ((int) key.charAt(i))%RANGE);
+		}
+		return decryptedString;
+		
+	}
+	
+	/**
+	 * Takes char a and shifts it by value of key along ASCII characters. if key is larger than RANGE it loops it back along the ASCII range
+	 * @param character a, the character that needs to be shifted up by n
+	 * @param integer n, the integer used to shift a
+	 * @return the shifted character
+	 * @author Halim Dogrusoz
+	 */
+	public static char shiftUpByN(char a, int n){
+		
+		// declare and initialize temp to integer value of (char a) minus integer value of LOWER_BOUND.
+		int temp = (int)(a) - (int)LOWER_BOUND;
+		// increase temp by n to determine the new encrypted value. 
+		temp = temp + n;
+		// if temp is out of range bring it back in range by temp%RANGE.
+		temp = temp % RANGE; //64 is the range 95-32+1	
+		// add back the integer value of LOWER_BOUND
+		temp = temp + (int)LOWER_BOUND;
+		// cast temp back to char before returning it.
+		return (char) temp;
+	}
+	
+	/**
+	 * Takes the bString and the length of the key it wants to generate and makes a new key.
+	 * @param String bString the string used to generate key by repeating it until its length long.
+	 * @param integer length length of the key
+	 * @return the Bellaso key
+	 * @author Halim Dogrusoz
+	 */
+	public static String createBellasoKey(String bString, int length) {
+		
+		//Define key
+		String key = "";
+		
+		// Iterate through the length 
+		for(int i = 0; i < length; i++) {
+			
+			// build key by cycling through bString using modulo operator.
+			key += bString.charAt(i % bString.length());
+		}
+		return key;
+	}
+
+
+	
+}
